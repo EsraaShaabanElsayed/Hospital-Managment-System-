@@ -4,7 +4,12 @@ import scala.jdk.CollectionConverters._
 
 class Receptionist (val id: String, val Fname: String, val Lname: String, val gender: String)
   extends Person {
-
+  //handling object for text file 
+    // do not touch this code 
+      def objectHandling(id: String, Fname: String,Lname:String, gender: String): String = {
+    val receptionist = id + "@" + Fname +"@"+Lname+ "@" + gender
+    receptionist
+  }
 //  def generateUniqueAppointmentId() = ???
 
   def addPatient(patient: Patient): Unit = {
