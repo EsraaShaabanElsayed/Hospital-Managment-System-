@@ -11,7 +11,7 @@ class Receptionist (val id: String, val Fname: String, val Lname: String, val ge
     receptionist
   }
 //  def generateUniqueAppointmentId() = ???
-
+ //first seach if patient is a new user or not 
   def addPatient(patient: Patient): Unit = {
 
     def addPatient(name: String, gender: String,id:String, diagnoses: ListBuffer[String], medicalHistory: ListBuffer[String]): Patient = {
