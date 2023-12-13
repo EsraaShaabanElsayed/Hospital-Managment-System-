@@ -2,7 +2,7 @@ import java.time.LocalDateTime
 import scala.collection.mutable.ListBuffer
 import scala.jdk.CollectionConverters._
 
-class Receptionist (val id: String, val name: String, val gender: String)
+class Receptionist (val id: String, val Fname: String, val Lname: String, val gender: String)
   extends Person {
 
 //  def generateUniqueAppointmentId() = ???
