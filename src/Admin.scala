@@ -16,6 +16,7 @@ class Admin extends Actor with ActorLogging {
     case UpdateDoctor(doctor) => updateDoctor(doctor)
     case RemoveDoctor(id) => removeDoctor(id)
   }
+  //read all receptionists from file 
 def loadReceptionistFromFile(): List[Receptionist] = {
     // Implementation to read doctors from a file
     // This can be a simple CSV, JSON, or any format suitable for your application
@@ -23,7 +24,7 @@ def loadReceptionistFromFile(): List[Receptionist] = {
     // Example: List(Doctor(1, "Dr. Smith", "Cardiology"), Doctor(2, "Dr. Johnson", "Pediatrics"))
     // ...
   }
-
+//read all doctors from file
   def loadDoctorsFromFile(): List[Doctor] = {
     // Implementation to read doctors from a file
     // This can be a simple CSV, JSON, or any format suitable for your application
