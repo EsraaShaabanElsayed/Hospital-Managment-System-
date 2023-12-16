@@ -1,76 +1,75 @@
-import akka.actor.{Actor, ActorSystem, Props}
-import scala.io.Source
-import scala.util.{Failure, Success, Try}
-import java.nio.file.{Files, Paths, StandardOpenOption}
-
-// Define messages for communication between actors
-case class AddPatient(patient: String)
-case class UpdatePatient(oldPatient: String, newPatient: String)
-case class DeletePatient(patient: String)
-case class AddAppointment(appointment: String)
-case object RetrieveAppointments
-
-// Define Receptionist actor
-class Receptionist(patientsFile: String, appointmentsFile: String) extends Actor {
-  private var patients: List[String] = readFromFile(patientsFile)
-  private var appointments: List[String] = readFromFile(appointmentsFile)
-
+import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props}
+case class Receptionist(id: Int, name: String, specialization: String)
+case class AddReceptionist(receptionist: Receptionist)
+case class GetReceptionist(id: Int)
+case class UpdateReceptionist(receptionist: Receptionist)
+case class RemoveReceptionist(id: Int)
+class ReceptionistActor(patientActor: ActorRef) extends Actor with ActorLogging {
+  var receptionists: Map[Int, Receptionist] = Map.empty
   override def receive: Receive = {
     case AddPatient(patient) =>
-      patients = patients :+ patient
-      writeToFile(patientsFile, patients)
+      patientActor ! AddPatient(patient)
 
-    case UpdatePatient(oldPatient, newPatient) =>
-      patients = patients.map(p => if (p == oldPatient) newPatient else p)
-      writeToFile(patientsFile, patients)
+    case GetPatient(id) =>
+      patientActor ! GetPatient(id)
 
-    case DeletePatient(patient) =>
-      patients = patients.filterNot(_ == patient)
-      writeToFile(patientsFile, patients)
+    case UpdatePatient(patient) =>
+      patientActor! UpdatePatient(patient)
 
-    case AddAppointment(appointment) =>
-      appointments = appointments :+ appointment
-      writeToFile(appointmentsFile, appointments)
+    case RemovePatient(id) =>
+      patientActor ! RemovePatient(id)
+    case AddReceptionist(receptionist)
+    =>
+      receptionists += (receptionist.id -> receptionist)
+      log.info(s"Doctor added: $receptionist")
 
-    case RetrieveAppointments =>
-      sender() ! appointments
+    case GetReceptionist(id)
+    =>
+      sender() ! receptionists.get(id)
+
+    case UpdateReceptionist(updatedReceptionist)
+    =>
+      receptionists.get(updatedReceptionist.id) match {
+        case Some(_) =>
+          receptionists += (updatedReceptionist.id -> updatedReceptionist)
+          log.info(s"Doctor updated: $updatedReceptionist")
+        case None =>
+          log.warning(s"Doctor with ID ${updatedReceptionist.id} not found.")
+      }
+
+    case RemoveReceptionist(id)
+    =>
+      receptionists.get(id) match {
+        case Some(doctor) =>
+          receptionists -= id
+          log.info(s"Doctor removed: $doctor")
+        case None =>
+          log.warning(s"Doctor with ID $id not found.")
+      }
   }
 
-  private def readFromFile(filePath: String): List[String] = {
-    Try(Source.fromFile(filePath).getLines().toList) match {
-      case Success(lines) => lines
-      case Failure(_)     => List()
-    }
-  }
 
-  private def writeToFile(filePath: String, data: List[String]): Unit = {
-    Files.write(Paths.get(filePath), data.mkString("\n").getBytes, StandardOpenOption.CREATE)
-  }
 }
 
-object ReceptionistApp extends App {
-  // Specify file paths
-  val patientsFile = "patients.txt"
-  val appointmentsFile = "appointments.txt"
+object PatientApp extends App {
+  val system = ActorSystem("hospitalSystem")
 
-  // Create Actor System
-  val system = ActorSystem("ReceptionistSystem")
+  // Create DoctorRepository actor
+  val patientActor = system.actorOf(Props[patientActor], "patientRepository")
 
-  // Create Receptionist actor
-  val receptionist = system.actorOf(Props(new Receptionist(patientsFile, appointmentsFile)), "receptionist")
+  // Create Admin actor and pass DoctorRepository actor reference
+  val admin = system.actorOf(Props(new ReceptionistActor(patientActor)), "admin")
 
-  // Example usage
-  receptionist ! AddPatient("John Doe")
-  receptionist ! AddAppointment("Appointment with John Doe at 10 AM")
+  // Example CRUD operations
+  admin ! AddPatient(Patient(1, "Dr. Smith", "Cardiology"))
+  admin ! AddPatient(Patient(2, "Dr. Johnson", "Orthopedics"))
+  admin ! GetPatient(1)
+  admin ! UpdatePatient(Patient(1, "Dr. Smith Jr.", "Cardiology"))
+  admin ! RemovePatient(2)
 
-  // Retrieve appointments
-  import akka.pattern.ask
-  import akka.util.Timeout
-  import scala.concurrent.duration._
-  implicit val timeout: Timeout = Timeout(5.seconds)
-  val future = (receptionist ? RetrieveAppointments).mapTo[List[String]]
-  val result = future.value.get.get
-  println(s"Appointments: $result")
+  // Shut down the actor system
+  system.terminate()
+}
 
   // Shutdown the system
   system.terminate()
