@@ -8,9 +8,9 @@ case class Doctor(username: String,email: String, password: String, specializati
 
 // Messages for CRUD operations
 case class AddDoctor(doctor: Doctor)
-case class GetDoctor(id: Int)
+case class GetDoctor(username: String)
 case class UpdateDoctor(doctor: Doctor)
-case class RemoveDoctor(id: Int)
+case class RemoveDoctor(username: String)
 
 // DoctorRepository actor to manage doctors
 class DoctorActor extends Actor with ActorLogging {
@@ -21,8 +21,8 @@ class DoctorActor extends Actor with ActorLogging {
       doctors += (doctor.id -> doctor)
       log.info(s"Doctor added: $doctor")
 
-    case GetDoctor(id) =>
-      sender() ! doctors.get(id)
+    case GetDoctor(username) =>
+      sender() ! doctors.get(username)
 
     case UpdateDoctor(updatedDoctor) =>
       doctors.get(updatedDoctor.id) match {
@@ -33,10 +33,10 @@ class DoctorActor extends Actor with ActorLogging {
           log.warning(s"Doctor with ID ${updatedDoctor.id} not found.")
       }
 
-    case RemoveDoctor(id) =>
-      doctors.get(id) match {
+    case RemoveDoctor(username) =>
+      doctors.get(username) match {
         case Some(doctor) =>
-          doctors -= id
+          doctors -= username 
           log.info(s"Doctor removed: $doctor")
         case None =>
           log.warning(s"Doctor with ID $id not found.")
