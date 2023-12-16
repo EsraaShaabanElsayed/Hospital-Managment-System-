@@ -1,13 +1,13 @@
 import akka.actor.{Actor, ActorLogging}
 
 // Doctor class
-case class Patient(id: Int, name: String, specialization: String)
+case class Patient(username: String, email: String,specialization: String)
 
 // Messages for CRUD operations
 case class AddPatient(patient: Patient)
-case class GetPatient(id: Int)
+case class GetPatient(username: String)
 case class UpdatePatient(patient: Patient)
-case class RemovePatient(id: Int)
+case class RemovePatient(username:String)
 
 // DoctorRepository actor to manage doctors
 class patientActor extends Actor with ActorLogging {
@@ -18,8 +18,8 @@ class patientActor extends Actor with ActorLogging {
       patients += (patient.id -> patient)
       log.info(s"Patient added: $patient")
 
-    case GetPatient(id) =>
-      sender() ! patients.get(id)
+    case GetPatient(username) =>
+      sender() ! patients.get(username)
 
     case UpdatePatient(updatedPatient) =>
       patients.get(updatedPatient.id) match {
@@ -30,10 +30,10 @@ class patientActor extends Actor with ActorLogging {
           log.warning(s"Patient with ID ${updatedPatient.id} not found.")
       }
 
-    case RemovePatient(id) =>
-      patients.get(id) match {
+    case RemovePatient(username) =>
+      patients.get(username) match {
         case Some(doctor) =>
-          patients -= id
+          patients -= username 
           log.info(s"Patient removed: $doctor")
         case None =>
           log.warning(s"Patient with ID $id not found.")
