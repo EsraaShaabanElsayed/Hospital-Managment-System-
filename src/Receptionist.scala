@@ -1,10 +1,10 @@
 import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props}
 
-case class Receptionist(id: Int, name: String, specialization: String)
+case class Receptionist( username: String,email: String, password: String ,specialization: String)
 case class AddReceptionist(receptionist: Receptionist)
-case class GetReceptionist(id: Int)
+case class GetReceptionist(username: String)
 case class UpdateReceptionist(receptionist: Receptionist)
-case class RemoveReceptionist(id: Int)
+case class RemoveReceptionist(username:String)
 
 // New Appointment-related messages
 case class ScheduleAppointment(patientUsername: String, doctorUsername: String, day: String)
@@ -18,21 +18,21 @@ class ReceptionistActor(patientActor: ActorRef, appointmentActor: ActorRef) exte
     case AddPatient(patient) =>
       patientActor ! AddPatient(patient)
 
-    case GetPatient(id) =>
-      patientActor ! GetPatient(id)
+    case GetPatient(username) =>
+      patientActor ! GetPatient(username)
 
     case UpdatePatient(patient) =>
       patientActor ! UpdatePatient(patient)
 
-    case RemovePatient(id) =>
-      patientActor ! RemovePatient(id)
+    case RemovePatient(username) =>
+      patientActor ! RemovePatient(username)
 
     case AddReceptionist(receptionist) =>
       receptionists += (receptionist.id -> receptionist)
       log.info(s"Receptionist added: $receptionist")
 
-    case GetReceptionist(id) =>
-      sender() ! receptionists.get(id)
+    case GetReceptionist(username) =>
+      sender() ! receptionists.get(username)
 
     case UpdateReceptionist(updatedReceptionist) =>
       receptionists.get(updatedReceptionist.id) match {
@@ -42,11 +42,11 @@ class ReceptionistActor(patientActor: ActorRef, appointmentActor: ActorRef) exte
         case None =>
           log.warning(s"Receptionist with ID ${updatedReceptionist.id} not found.")
       }
-    case RemoveReceptionist(id)
+    case RemoveReceptionist(username)
     =>
-      receptionists.get(id) match {
+      receptionists.get(username) match {
         case Some(doctor) =>
-          receptionists -= id
+          receptionists -= username 
           log.info(s"Receptionist removed: $doctor")
         case None =>
           log.warning(s"Receptionsit with ID $id not found.")
