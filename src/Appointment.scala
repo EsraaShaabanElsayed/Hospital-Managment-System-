@@ -1,12 +1,3 @@
-// class Appointment(val id: String, val patientId:String, val doctorId: String, val date: String, val time: String)
-// { 
-//   // do not touch or edit this code ever never 
-//   //handling object for file for write
-//   def objectHandling (id:String,patientId:String,doctorId:String,date:String,time: String): String = {
-//      val appointment= id+"@"+patientId+"@"+doctorId+"@"+date+"@"+time
-//     appointment
-//   }
-// }
 case class Appointment(patientUsername: String, doctorUsername: String, day: String)
 import akka.actor.{Actor, ActorLogging, Props}
 
@@ -43,3 +34,52 @@ class AppointmentActor extends Actor with ActorLogging {
         sender() ! AppointmentNotUpdated(oldAppointment, newAppointment)
       }
   }
+
+  // Helper method to check doctor availability
+  private def isAvailable(appointment: Appointment): Boolean = {
+    // Implement logic to check doctor's availability for the specified day
+    // For simplicity, assume the doctor is always available
+    true
+  }
+}
+
+// Step 2: Companion object for AppointmentActor
+object AppointmentActor {
+  case class ScheduleAppointment(appointment: Appointment)
+  case class CancelAppointment(appointment: Appointment)
+  case object GetAppointments
+  case class AppointmentScheduled(appointment: Appointment)
+  case class AppointmentUpdated(oldAppointment: Appointment, newAppointment: Appointment)
+  case class AppointmentNotUpdated(oldAppointment: Appointment, newAppointment: Appointment)
+
+  case class AppointmentNotScheduled(appointment: Appointment)
+  case class AppointmentCanceled(appointment: Appointment)
+  case class AppointmentsList(appointments: List[Appointment])
+  case class UpdateAppointment(oldAppointment: Appointment, newAppointment: Appointment)
+  def props: Props = Props[AppointmentActor]
+
+}
+import akka.actor.{ActorRef, ActorSystem, Props}
+
+
+
+
+
+
+/*
+override def receive: Receive = {
+    case ScheduleAppointment(appointment) =>
+      if (isAvailable(appointment)) {
+        appointments = appointments :+ appointment
+        log.info(s"Appointment scheduled: $appointment")
+        sender() ! AppointmentScheduled(appointment)
+      } else {
+        log.warning(s"Doctor not available for the appointment: $appointment")
+        sender() ! AppointmentNotScheduled(appointment)
+      }
+
+    case CancelAppointment(appointment) =>
+      appointments = appointments.filterNot(_ == appointment)
+      log.info(s"Appointment canceled: $appointment")
+      sender() ! AppointmentCanceled(appointment)
+ */
