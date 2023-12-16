@@ -42,6 +42,15 @@ class ReceptionistActor(patientActor: ActorRef, appointmentActor: ActorRef) exte
         case None =>
           log.warning(s"Receptionist with ID ${updatedReceptionist.id} not found.")
       }
+    case RemoveReceptionist(id)
+    =>
+      receptionists.get(id) match {
+        case Some(doctor) =>
+          receptionists -= id
+          log.info(s"Receptionist removed: $doctor")
+        case None =>
+          log.warning(s"Receptionsit with ID $id not found.")
+      }
 
     // New Appointment-related cases
     case ScheduleAppointment(patientUsername, doctorUsername, day) =>
