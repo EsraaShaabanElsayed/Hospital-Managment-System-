@@ -28,16 +28,16 @@ class ReceptionistActor(patientActor: ActorRef, appointmentActor: ActorRef) exte
       patientActor ! RemovePatient(username)
 
     case AddReceptionist(receptionist) =>
-      receptionists += (receptionist.id -> receptionist)
+      receptionists += (receptionist.username -> receptionist)
       log.info(s"Receptionist added: $receptionist")
 
     case GetReceptionist(username) =>
       sender() ! receptionists.get(username)
 
     case UpdateReceptionist(updatedReceptionist) =>
-      receptionists.get(updatedReceptionist.id) match {
+      receptionists.get(updatedReceptionist.username) match {
         case Some(_) =>
-          receptionists += (updatedReceptionist.id -> updatedReceptionist)
+          receptionists += (updatedReceptionist.username-> updatedReceptionist)
           log.info(s"Receptionist updated: $updatedReceptionist")
         case None =>
           log.warning(s"Receptionist with ID ${updatedReceptionist.id} not found.")
