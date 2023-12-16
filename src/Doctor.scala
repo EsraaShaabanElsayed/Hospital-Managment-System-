@@ -1,7 +1,9 @@
 import akka.actor.{Actor, ActorLogging}
 
 // Doctor class
-case class Doctor(id: Int, name: String, specialization: String)
+case class Doctor(username: String,email: String, password: String, specialization: String)
+
+ 
 
 
 // Messages for CRUD operations
